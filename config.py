@@ -34,6 +34,18 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
 
+    @classmethod
+    def _fix_redis_url(cls, url: str) -> str:
+        if url and url.startswith("rediss://") and "ssl_cert_reqs" not in url:
+            return f"{url}?ssl_cert_reqs=none"
+        return url
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.REDIS_URL = self._fix_redis_url(self.REDIS_URL)
+        self.CELERY_BROKER_URL = self._fix_redis_url(self.CELERY_BROKER_URL)
+        self.CELERY_RESULT_BACKEND = self._fix_redis_url(self.CELERY_RESULT_BACKEND)
+
 
 # Global settings instance
 settings = Settings()
