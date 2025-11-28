@@ -1,0 +1,11 @@
+sku,name,description,price,quantity,is_active
+PROD-001,Wireless Mouse,Ergonomic wireless mouse with USB receiver,29.99,100,true
+PROD-002,USB Keyboard,Mechanical keyboard with RGB lighting,79.99,50,true
+PROD-003,Monitor Stand,Adjustable monitor stand with storage,45.00,75,true
+PROD-004,Laptop Sleeve,Protective 15-inch laptop sleeve,19.99,200,true
+PROD-005,USB-C Hub,7-in-1 USB-C hub with HDMI and ethernet,59.99,80,true
+PROD-006,Webcam HD,1080p webcam with built-in microphone,89.99,60,true
+PROD-007,Desk Lamp,LED desk lamp with adjustable brightness,34.99,120,true
+PROD-008,Cable Organizer,Desktop cable management system,12.99,300,true
+PROD-009,Phone Stand,Adjustable phone and tablet stand,15.99,150,true
+PROD-010,Bluetooth Speaker,Portable wireless speaker with 10hr battery,49.99,90,true
