@@ -33,6 +33,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 @app.get("/")
+@app.head("/")
 async def root():
     """Serve the main HTML page"""
     return FileResponse("static/index.html")
