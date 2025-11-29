@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     
     # File Upload
     UPLOAD_DIR: str = "uploads"
-    MAX_FILE_SIZE: int = 104857600  # 100MB in bytes
+    MAX_FILE_SIZE: int = 524288000  # 500MB in bytes
     
     # CORS
     CORS_ORIGINS: str = "http://localhost:8000,http://127.0.0.1:8000"
