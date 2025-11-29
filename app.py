@@ -49,7 +49,22 @@ async def health_check():
 async def startup_event():
     """Initialize database on startup"""
     init_db()
+    init_db()
     print("✅ Database initialized")
+    
+    # Debug Redis URL (masking password)
+    try:
+        redis_url = settings.REDIS_URL
+        if "@" in redis_url:
+            # Handle standard format: scheme://user:pass@host:port...
+            scheme_part = redis_url.split("://")[0]
+            host_part = redis_url.split("@")[1]
+            print(f"🔌 Using Redis URL: {scheme_part}://****@{host_part}")
+        else:
+            print(f"🔌 Using Redis URL: {redis_url}")
+    except Exception as e:
+        print(f"⚠️ Could not log Redis URL: {e}")
+
     print("🚀 Product Importer SaaS is running!")
 
 
