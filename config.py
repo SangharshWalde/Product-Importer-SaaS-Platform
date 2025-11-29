@@ -36,8 +36,18 @@ class Settings(BaseSettings):
 
     @classmethod
     def _fix_redis_url(cls, url: str) -> str:
-        if url and url.startswith("rediss://") and "ssl_cert_reqs" not in url:
-            return f"{url}?ssl_cert_reqs=none"
+        if not url:
+            return url
+            
+        # Force SSL for Upstash
+        if "upstash.io" in url and url.startswith("redis://"):
+            url = url.replace("redis://", "rediss://", 1)
+            
+        # Add ssl_cert_reqs=none if using SSL
+        if url.startswith("rediss://") and "ssl_cert_reqs" not in url:
+            separator = "&" if "?" in url else "?"
+            return f"{url}{separator}ssl_cert_reqs=none"
+            
         return url
 
     def __init__(self, **kwargs):
