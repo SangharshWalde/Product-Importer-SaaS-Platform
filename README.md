@@ -1,66 +1,86 @@
-# Product Importer SaaS 📦
+# 🚀 High-Performance Product Importer SaaS
 
-A high-performance, scalable SaaS application for importing large product datasets (up to 500,000+ records) with real-time progress tracking.
+Hey there! 👋 This is a robust, production-ready SaaS backend designed to handle **massive data imports** efficiently.
 
-## 🚀 Features
+I built this project to solve a specific engineering challenge: **How do you process 500,000+ records on a server with limited RAM without crashing it?**
 
--   **Massive CSV Import**: Process 500k+ products in seconds using bulk database operations.
--   **Real-Time Feedback**: Live progress bar powered by Server-Sent Events (SSE).
--   **Product Management**: Full CRUD (Create, Read, Update, Delete) with Search & Pagination.
--   **Bulk Actions**: "Delete All" functionality with custom confirmation modal.
--   **Webhooks**: Event-driven architecture triggering external URLs on product changes.
--   **Robust Stack**: FastAPI, PostgreSQL, Redis, Celery.
+Most tutorials show you how to upload a file. This project shows you how to do it **at scale**.
 
-## 🛠️ How to Run
+---
 
-The application requires two separate terminal windows to run the backend server and the background worker.
+## 💡 The Problem & My Solution
 
-### 1. Start Backend & Redis
-Open PowerShell in the project folder:
-```powershell
-.\start_backend.ps1
-```
-*This starts Redis and the FastAPI server on http://localhost:8000*
+### The Challenge
+Loading a large CSV file (e.g., 500MB) directly into memory causes "Out of Memory" (OOM) crashes, especially on free-tier cloud hosting (like Render/Heroku) which often limits RAM to 512MB.
 
-### 2. Start Background Worker
-Open a **second** PowerShell window:
-```powershell
-.\start_celery.ps1
-```
-*This starts the Celery worker to handle file processing and webhooks.*
+### How I Fixed It (The "Secret Sauce")
+Instead of the naive approach, I engineered a **Stream-based Architecture**:
+1.  **Streaming Uploads:** The backend writes the incoming file to disk in small **1MB chunks**. The file is never fully loaded into RAM.
+2.  **Chunked Processing:** A background worker (Celery) reads the file using **Pandas iterators**, processing just **1,000 rows at a time**.
+3.  **Async Pipeline:** The heavy lifting happens in the background, keeping the web server responsive. Real-time progress is pushed to the UI via **Server-Sent Events (SSE)**.
 
-### 3. Access the App
-Open your browser to: **http://localhost:8000**
+---
 
-## 📚 Usage Guide
+## 🛠️ Tech Stack
 
-### Importing Products
-1.  Click the "Upload CSV File" area.
-2.  Select a CSV file (Format: `sku,name,description,price,quantity`).
-3.  Watch the progress bar as products are imported.
+*   **Backend:** Python 3.11, FastAPI (for speed)
+*   **Async Task Queue:** Celery + Redis (Upstash)
+*   **Database:** PostgreSQL (Neon Tech) + SQLAlchemy
+*   **Data Processing:** Pandas (optimized with chunking)
+*   **Deployment:** Render (Dockerized environment)
 
-### Managing Products
--   **Search**: Type in the search box to filter by SKU or Name.
--   **Edit**: Click "Edit" on any row to modify details.
--   **Delete**: Click "Delete" to remove a single item.
--   **Delete All**: Click "Delete All" to clear the database (requires confirmation).
+---
 
-### Webhooks
-1.  Click "Add Webhook".
-2.  Enter a target URL (e.g., `https://webhook.site/...`).
-3.  Select an event type (e.g., `product.created`).
-4.  The system will now send POST requests to that URL when events occur.
+## ✨ Key Features
 
-## 🔧 Troubleshooting
+*   ✅ **Bulk Import:** Tested with **500,000+ products**.
+*   ✅ **Real-time Progress:** Watch the progress bar update live as rows are processed.
+*   ✅ **Memory Efficient:** Runs smoothly on low-resource environments (512MB RAM).
+*   ✅ **Data Validation:** Skips bad rows automatically and reports errors.
+*   ✅ **CRUD Operations:** Full product management (Search, Filter, Edit, Delete).
+*   ✅ **Webhooks:** Trigger external APIs when products are created/updated.
 
--   **"Waiting 0%" stuck**: Ensure the Celery worker (`start_celery.ps1`) is running.
--   **Database Error**: Check that PostgreSQL is running and credentials in `.env` are correct.
--   **Redis Error**: Ensure `redis-server.exe` is running (started automatically by `start_backend.ps1`).
+---
 
-## 📁 Project Structure
+## 🚀 How to Run Locally
 
--   `app.py`: Main FastAPI application.
--   `tasks/`: Celery task definitions (CSV processing, webhooks).
--   `routes/`: API endpoints.
--   `models/`: Database schemas.
--   `static/`: Frontend assets (HTML, CSS, JS).
+1.  **Clone the repo:**
+    ```bash
+    git clone https://github.com/SangharshWalde/Product-Importer-SaaS-Platform.git
+    cd Product-Importer-SaaS-Platform
+    ```
+
+2.  **Set up environment:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # or venv\Scripts\activate on Windows
+    pip install -r requirements.txt
+    ```
+
+3.  **Configure .env:**
+    Create a `.env` file (see `.env.example`) with your DB and Redis credentials.
+
+4.  **Run it:**
+    ```bash
+    # Start Redis (if local)
+    # Start the Worker
+    celery -A celery_app worker --loglevel=info
+
+    # Start the Server
+    uvicorn app:app --reload
+    ```
+
+---
+
+## 📸 Screenshots
+
+*(Add your screenshots here! Show the upload progress bar and the dashboard.)*
+
+---
+
+## 🤝 Connect
+
+If you found this interesting or want to discuss System Design, feel free to reach out!
+
+**Sangharsh Walde**
+[GitHub](https://github.com/SangharshWalde) | [LinkedIn](https://linkedin.com/in/sangharsh-walde)
