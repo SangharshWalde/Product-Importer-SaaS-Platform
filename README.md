@@ -74,7 +74,6 @@ Instead of the naive approach, I engineered a **Stream-based Architecture**:
 
 ## 📸 Screenshots
 
-*(Add your screenshots here! Show the upload progress bar and the dashboard.)*
 
 ---
 
