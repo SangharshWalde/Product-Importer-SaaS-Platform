@@ -31,6 +31,18 @@ async def upload_csv(file: UploadFile = File(...)):
         chunk_size = 1024 * 1024  # 1MB chunks
         
         # Generate unique filename
+        file_id = str(uuid.uuid4())
+        file_path = os.path.join(settings.UPLOAD_DIR, f"{file_id}.csv")
+        
+        try:
+            with open(file_path, "wb") as f:
+                while True:
+                    chunk = await file.read(chunk_size)
+                    if not chunk:
+                        break
+                    file_size += len(chunk)
+                    if file_size > settings.MAX_FILE_SIZE:
+                        raise HTTPException(
                             status_code=400,
                             detail=f"File size exceeds maximum allowed size of {settings.MAX_FILE_SIZE} bytes"
                         )
