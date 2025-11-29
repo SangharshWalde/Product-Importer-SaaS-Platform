@@ -39,6 +39,22 @@ class Settings(BaseSettings):
         if not url:
             return url
             
+        # Clean up common copy-paste errors
+        url = url.strip()
+        if "redis-cli" in url:
+            # Extract URL from redis-cli command
+            # Example: redis-cli --tls -u redis://...
+            import re
+            match = re.search(r'(rediss?://\S+)', url)
+            if match:
+                url = match.group(1)
+        
+        # Handle Upstash REST URL (https://) -> rediss://
+        # Note: This only works if the user included user:pass in the https URL, which is rare for REST.
+        # But we can try to fix the scheme at least.
+        if url.startswith("https://") and "upstash.io" in url:
+            url = url.replace("https://", "rediss://", 1)
+
         # Force SSL for Upstash
         if "upstash.io" in url and url.startswith("redis://"):
             url = url.replace("redis://", "rediss://", 1)
