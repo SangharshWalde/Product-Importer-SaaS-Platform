@@ -26,27 +26,19 @@ async def upload_csv(file: UploadFile = File(...)):
         if not file.filename.endswith('.csv'):
             raise HTTPException(status_code=400, detail="Only CSV files are allowed")
         
-        # Check file size (read in chunks to avoid memory issues)
+        # Save file in chunks to avoid memory issues
         file_size = 0
         chunk_size = 1024 * 1024  # 1MB chunks
         
-        # Read file content
-        content = await file.read()
-        file_size = len(content)
-        
-        if file_size > settings.MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=400,
-                detail=f"File size exceeds maximum allowed size of {settings.MAX_FILE_SIZE} bytes"
-            )
-        
         # Generate unique filename
-        file_id = str(uuid.uuid4())
-        file_path = os.path.join(settings.UPLOAD_DIR, f"{file_id}.csv")
-        
-        # Save file
-        with open(file_path, "wb") as f:
-            f.write(content)
+                            status_code=400,
+                            detail=f"File size exceeds maximum allowed size of {settings.MAX_FILE_SIZE} bytes"
+                        )
+                    f.write(chunk)
+        except Exception as e:
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            raise e
         
         # Validate CSV headers
         try:

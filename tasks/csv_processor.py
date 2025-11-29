@@ -24,38 +24,38 @@ def process_csv_file(self, file_path: str, task_id: str):
         # Update initial status
         tracker.set_progress(task_id, 0, "Reading CSV file...", 100)
         
-        # Read CSV file
-        df = pd.read_csv(file_path)
-        total_rows = len(df)
-        
-        if total_rows == 0:
-            tracker.set_error(task_id, "CSV file is empty")
-            return {"status": "error", "message": "CSV file is empty"}
-        
-        # Normalize column names
-        df.columns = df.columns.str.lower().str.strip()
-        
-        # Validate required columns
-        required_columns = {'sku', 'name', 'price'}
-        if not required_columns.issubset(set(df.columns)):
-            missing = required_columns - set(df.columns)
-            error_msg = f"Missing required columns: {', '.join(missing)}"
-            tracker.set_error(task_id, error_msg)
-            return {"status": "error", "message": error_msg}
-        
-        # Process in chunks
+        # Process in chunks using pandas chunksize iterator
         chunk_size = 1000
         processed = 0
         created_count = 0
         updated_count = 0
         error_count = 0
         
+        # Get total rows for progress tracking (approximate or separate count)
+        # Note: Counting rows in a large file can be slow, but needed for progress bar.
+        # We'll use a generator to count lines efficiently without loading file.
+        with open(file_path, 'rb') as f:
+            total_rows = sum(1 for _ in f) - 1 # Subtract header
+            
+        if total_rows <= 0:
+             tracker.set_error(task_id, "CSV file is empty")
+             return {"status": "error", "message": "CSV file is empty"}
+
         tracker.set_progress(task_id, 0, f"Processing {total_rows} products...", total_rows)
         
-        for start_idx in range(0, total_rows, chunk_size):
-            end_idx = min(start_idx + chunk_size, total_rows)
-            chunk = df.iloc[start_idx:end_idx]
+        # Iterate over chunks directly from read_csv
+        for chunk in pd.read_csv(file_path, chunksize=chunk_size):
+            # Normalize column names for this chunk
+            chunk.columns = chunk.columns.str.lower().str.strip()
             
+            # Validate required columns (only need to check first chunk really, but safe to check all)
+            required_columns = {'sku', 'name', 'price'}
+            if not required_columns.issubset(set(chunk.columns)):
+                missing = required_columns - set(chunk.columns)
+                error_msg = f"Missing required columns: {', '.join(missing)}"
+                tracker.set_error(task_id, error_msg)
+                return {"status": "error", "message": error_msg}
+
             # 1. Collect SKUs in this chunk
             chunk_skus = []
             sku_to_row = {}
