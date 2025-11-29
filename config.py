@@ -69,8 +69,17 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.REDIS_URL = self._fix_redis_url(self.REDIS_URL)
-        self.CELERY_BROKER_URL = self._fix_redis_url(self.CELERY_BROKER_URL)
-        self.CELERY_RESULT_BACKEND = self._fix_redis_url(self.CELERY_RESULT_BACKEND)
+        
+        # Fallback to REDIS_URL if Celery vars are missing or default
+        if not self.CELERY_BROKER_URL or "localhost" in self.CELERY_BROKER_URL:
+            self.CELERY_BROKER_URL = self.REDIS_URL
+        else:
+            self.CELERY_BROKER_URL = self._fix_redis_url(self.CELERY_BROKER_URL)
+            
+        if not self.CELERY_RESULT_BACKEND or "localhost" in self.CELERY_RESULT_BACKEND:
+            self.CELERY_RESULT_BACKEND = self.REDIS_URL
+        else:
+            self.CELERY_RESULT_BACKEND = self._fix_redis_url(self.CELERY_RESULT_BACKEND)
 
 
 # Global settings instance
